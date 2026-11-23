@@ -14,3 +14,8 @@ This workflow is distinct from upstream CI and leaves the upstream test suite in
 
 ## Fix log
 - Fixed GitHub Actions output directory mismatch: PurffleShorts writes to `output_videos/`, not `DATA_DIR`. Commit `f134c4556aa61a44c6884ca3a8dcb49d810d818c`. The first demo successfully rendered before the artifact verification step failed. Re-run the workflow to verify the fix.
+
+## YouTube gameplay (Android)
+In Actions → Android - Generate Reddit Short → Run workflow, paste an HTTPS YouTube video link into **youtube_gameplay_url**, select **background: random**, and check **gameplay_rights** only when you own the footage or have permission to reuse it. The runner uses yt-dlp to download a single MP4, then passes it to the original background renderer. Downloads can fail if YouTube restricts access; no bypass is guaranteed. Without a gameplay file or URL, random mode now fails clearly. To render without gameplay, select **generated**.
+
+Change log: 11:30 PM PHT, November 24, 2026 — added YouTube gameplay URL and rights confirmation, preserved original rendering, and corrected cover/metadata artifact paths. Status: committed; cloud render with YouTube URL not yet verified.
