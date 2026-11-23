@@ -14,12 +14,23 @@ def download_authorized_gameplay(url: str, folder: Path) -> None:
     if os.environ.get("GAMEPLAY_RIGHTS", "false").lower() != "true":
         raise SystemExit("Check gameplay_rights to confirm you may reuse the YouTube footage")
     folder.mkdir(parents=True, exist_ok=True)
-    subprocess.run([sys.executable, "-m", "yt_dlp", "--no-playlist", "--max-filesize", "350M",
-                    "--match-filter", "duration <= 1800", "--merge-output-format", "mp4",
-                    "-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best",
-                    "-o", str(folder / "youtube-gameplay.%(ext)s"), url], check=True)
-    if not any(p.suffix.lower() == ".mp4" for p in folder.iterdir()):
-        raise SystemExit("YouTube download did not produce an MP4; check the URL and yt-dlp logs")
+    errors = []
+    for command in (
+        ["node", "tools/download_gameplay.cjs", str(folder / "youtube-gameplay.mp4")],
+        [sys.executable, "-m", "yt_dlp", "--no-playlist", "--max-filesize", "350M",
+         "--match-filter", "duration <= 1800", "--merge-output-format", "mp4",
+         "-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best",
+         "-o", str(folder / "youtube-gameplay.%(ext)s"), url],
+    ):
+        try:
+            subprocess.run(command, check=True)
+            if any(p.suffix.lower() == ".mp4" and p.stat().st_size > 100000 for p in folder.iterdir()):
+                return
+            errors.append("Downloader produced no valid MP4")
+        except (subprocess.CalledProcessError, OSError) as exc:
+            errors.append(str(exc))
+    raise SystemExit("Both npm and yt-dlp downloads failed. YouTube may require authentication on GitHub-hosted runners. " + "; ".join(errors))
+
 
 
 VOICES = {"guy": "en-US-GuyNeural", "jenny": "en-US-JennyNeural",
