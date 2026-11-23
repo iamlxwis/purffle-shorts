@@ -1,0 +1,84 @@
+"""Convert an accessible public Reddit self-post to a PurffleShorts script.
+No credentials or access-control bypass; fail if Reddit denies access.
+"""
+import html
+import json
+import os
+import random
+import re
+import sys
+from pathlib import Path
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+
+USER_AGENT = "PurffleShorts/1.0 (public-story attribution; contact repository owner)"
+def fetch_json(url):
+    req = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    with urlopen(req, timeout=25) as response:
+        return json.load(response)
+
+def clean(s):
+    s = html.unescape(re.sub(r"<[^>]+>", " ", str(s)))
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+def choose_post():
+    direct = os.environ.get("REDDIT_POST_URL", "").strip()
+    if direct:
+        u = urlparse(direct)
+        if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"} or not re.match(r"^/r/[A-Za-z0-9_]+/comments/[A-Za-z0-9]+/", u.path):
+            raise ValueError("Provide an HTTPS reddit.com/r/.../comments/... post URL")
+        url = "https://www.reddit.com" + u.path.rstrip("/") + ".json?raw_json=1"
+        data = fetch_json(url)
+        return data[0]["data"]["children"][0]["data"]
+    sub = os.environ.get("REDDIT_SUBREDDIT", "stories").strip().removeprefix("r/")
+    if not re.fullmatch(r"[A-Za-z0-9_]{2,21}", sub):
+        raise ValueError("Invalid subreddit name")
+    data = fetch_json(f"https://www.reddit.com/r/{sub}/top.json?t=week&limit=50&raw_json=1")
+    posts = [x["data"] for x in data["data"]["children"]]
+    eligible = [p for p in posts if p.get("is_self") and not p.get("over_18") and not p.get("stickied")
+                and not p.get("removed_by_category") and 90 <= len(clean(p.get("selftext", ""))) <= 6500
+                and p.get("selftext") not in ("[removed]", "[deleted]")]
+    if not eligible:
+        raise ValueError("No eligible public text posts; choose another subreddit or direct post URL")
+    return random.choice(eligible)
+
+def build(post):
+    title = clean(post.get("title", ""))
+    body = clean(post.get("selftext", ""))
+    if not title or len(body) < 90:
+        raise ValueError("Post has no usable story text")
+    words = body.split()
+    # Keep a short-form excerpt, without inventing an ending or rewriting the author.
+    words = words[:155]
+    chunks = [" ".join(words[i:i+30]) for i in range(0, len(words), 30)]
+    community = post.get("subreddit", "stories")
+    permalink = "https://www.reddit.com" + post.get("permalink", "")
+    if not permalink.startswith("https://www.reddit.com/r/"):
+        raise ValueError("Invalid Reddit permalink")
+    return {
+        "topic": title[:100], "title": title[:100], "hook_text": title[:45],
+        "style": "reddit", "language": "en", "category": "entertainment",
+        "cast": ["r/" + community, "u/" + post.get("author", "unknown")],
+        "scenes": [{"speaker": "A", "narration": title, "search_query": "minecraft parkour",
+                    "image_prompt": "", "emphasis": [], "emoji": ""}]
+                  + [{"speaker": "A", "narration": chunk, "search_query": "minecraft parkour",
+                      "image_prompt": "", "emphasis": [], "emoji": ""} for chunk in chunks],
+        "description": f"Excerpt of a public Reddit post by u/{post.get('author','unknown')} in r/{community}. Source: {permalink}. The narration may be truncated.",
+        "hashtags": ["#reddit", "#redditstories", "#shorts"],
+        "tags": ["reddit story", community, "minecraft gameplay"],
+    }
+
+def main():
+    out = Path(sys.argv[1] if len(sys.argv) > 1 else "android-output/reddit-script.json")
+    try:
+        post = choose_post()
+        script = build(post)
+    except Exception as exc:
+        raise SystemExit(f"Reddit retrieval failed: {exc}. Reddit may restrict automated access; no fabricated fallback will be used.") from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(script, indent=2, ensure_ascii=False), encoding="utf-8")
+    print("Selected public Reddit story:", script["description"], flush=True)
+
+if __name__ == "__main__":
+    main()
