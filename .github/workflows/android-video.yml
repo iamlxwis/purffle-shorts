@@ -15,6 +15,14 @@ on:
         description: "Optional specific public Reddit post URL"
         type: string
         default: ""
+      reddit_manual_title:
+        description: "Optional post title when Reddit blocks automatic retrieval"
+        type: string
+        default: ""
+      reddit_manual_body:
+        description: "Optional post text when Reddit blocks automatic retrieval (paste text)"
+        type: string
+        default: ""
       script_path:
         description: "For script mode: committed JSON path"
         type: string
@@ -74,6 +82,8 @@ jobs:
           SCRIPT_PATH: ${{ inputs.script_path }}
           REDDIT_SUBREDDIT: ${{ inputs.reddit_subreddit }}
           REDDIT_POST_URL: ${{ inputs.reddit_post_url }}
+          REDDIT_MANUAL_TITLE: ${{ inputs.reddit_manual_title }}
+          REDDIT_MANUAL_BODY: ${{ inputs.reddit_manual_body }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           BACKGROUND: ${{ inputs.background }}
