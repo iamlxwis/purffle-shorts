@@ -3,18 +3,18 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "Demo needs no API key; script uses your own JSON"
+        description: "Production render using a committed story script"
         type: choice
-        options: [demo, script]
-        default: demo
+        options: [script]
+        default: script
       script_path:
         description: "For script mode: committed JSON path"
         type: string
         default: examples/android-story.json
       background:
-        description: "Random licensed gameplay from media/backgrounds, or generated demo"
+        description: "Use permitted gameplay from YouTube URL or committed clips"
         type: choice
-        options: [random, generated]
+        options: [random]
         default: random
       youtube_gameplay_url:
         description: "Optional YouTube gameplay URL (only footage you own or may reuse)"
@@ -64,7 +64,7 @@ jobs:
           python -m compileall -q purffle_shorts
           ffmpeg -hide_banner -filters | grep -E ' ass '
           python -m purffle_shorts --help
-      - name: Render with native PurffleShorts pipeline
+      - name: Generate production video with PurffleShorts
         env:
           MODE: ${{ inputs.mode }}
           SCRIPT_PATH: ${{ inputs.script_path }}
