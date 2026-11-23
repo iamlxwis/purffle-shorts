@@ -1,0 +1,42 @@
+{
+  "topic": "the mystery package",
+  "title": "The Package Nobody Ordered",
+  "hook_text": "WHO SENT THIS?",
+  "style": "reddit",
+  "category": "entertainment",
+  "scenes": [
+    {
+      "narration": "A package appeared outside my door with no name on it. I checked every delivery app, but there was no order.",
+      "search_query": "mysterious package",
+      "emphasis": [
+        "no name"
+      ],
+      "emoji": "📦"
+    },
+    {
+      "narration": "Inside was a handwritten note thanking me for helping someone last winter. I had almost forgotten the day I stopped to help a stranger change a tire.",
+      "search_query": "handwritten letter",
+      "emphasis": [
+        "thank you"
+      ],
+      "emoji": "✉️"
+    },
+    {
+      "narration": "The package contained a small photo of that snowy roadside. It reminded me that tiny acts of kindness can stay with people for years.",
+      "search_query": "winter roadside",
+      "emphasis": [
+        "kindness"
+      ],
+      "emoji": "❄️"
+    }
+  ],
+  "description": "An original fictional story about an unexpected thank you.",
+  "hashtags": [
+    "#shorts",
+    "#story"
+  ],
+  "tags": [
+    "fictional story",
+    "short story"
+  ]
+}
