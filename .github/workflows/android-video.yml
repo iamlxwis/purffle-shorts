@@ -74,6 +74,8 @@ jobs:
           SCRIPT_PATH: ${{ inputs.script_path }}
           REDDIT_SUBREDDIT: ${{ inputs.reddit_subreddit }}
           REDDIT_POST_URL: ${{ inputs.reddit_post_url }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           BACKGROUND: ${{ inputs.background }}
           YOUTUBE_GAMEPLAY_URL: https://youtu.be/s3_xa3qdsks
           GAMEPLAY_RIGHTS: ${{ inputs.gameplay_rights }}
