@@ -3,10 +3,18 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "Production render using a committed story script"
+        description: "Production story source: public Reddit or your script"
         type: choice
-        options: [script]
-        default: script
+        options: [reddit, script]
+        default: reddit
+      reddit_subreddit:
+        description: "Subreddit for a random public text post"
+        type: string
+        default: stories
+      reddit_post_url:
+        description: "Optional specific public Reddit post URL"
+        type: string
+        default: ""
       script_path:
         description: "For script mode: committed JSON path"
         type: string
@@ -68,6 +76,8 @@ jobs:
         env:
           MODE: ${{ inputs.mode }}
           SCRIPT_PATH: ${{ inputs.script_path }}
+          REDDIT_SUBREDDIT: ${{ inputs.reddit_subreddit }}
+          REDDIT_POST_URL: ${{ inputs.reddit_post_url }}
           BACKGROUND: ${{ inputs.background }}
           YOUTUBE_GAMEPLAY_URL: ${{ inputs.youtube_gameplay_url }}
           GAMEPLAY_RIGHTS: ${{ inputs.gameplay_rights }}
