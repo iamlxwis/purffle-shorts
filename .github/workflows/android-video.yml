@@ -2,55 +2,14 @@ name: Android - Generate Reddit Short
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: "Production story source: public Reddit or your script"
-        type: choice
-        options: [reddit, script]
-        default: reddit
-      reddit_subreddit:
-        description: "Subreddit for a random public text post"
-        type: string
-        default: stories
-      reddit_post_url:
-        description: "Optional specific public Reddit post URL"
-        type: string
-        default: ""
       reddit_manual_title:
-        description: "Optional post title when Reddit blocks automatic retrieval"
+        description: "Video title"
         type: string
-        default: ""
+        required: true
       reddit_manual_body:
-        description: "Optional post text when Reddit blocks automatic retrieval (paste text)"
+        description: "Post text"
         type: string
-        default: ""
-      script_path:
-        description: "For script mode: committed JSON path"
-        type: string
-        default: examples/android-story.json
-      background:
-        description: "Use permitted gameplay from YouTube URL or committed clips"
-        type: choice
-        options: [random]
-        default: random
-      gameplay_rights:
-        description: "I confirm permission to reuse the fixed YouTube gameplay video"
-        type: boolean
-        default: false
-      layout:
-        description: "Full gameplay with captions or split"
-        type: choice
-        options: [full, split]
-        default: full
-      voice:
-        description: "Edge TTS voice"
-        type: choice
-        options: [guy, jenny, ryan, sonia]
-        default: guy
-      captions:
-        description: "Caption style (karaoke highlights current words)"
-        type: choice
-        options: [karaoke, bold, clean, boxed]
-        default: karaoke
+        required: true
 permissions:
   contents: read
 concurrency:
@@ -87,20 +46,14 @@ jobs:
           python -m purffle_shorts --help
       - name: Generate production video with PurffleShorts
         env:
-          MODE: ${{ inputs.mode }}
-          SCRIPT_PATH: ${{ inputs.script_path }}
-          REDDIT_SUBREDDIT: ${{ inputs.reddit_subreddit }}
-          REDDIT_POST_URL: ${{ inputs.reddit_post_url }}
+          MODE: reddit
           REDDIT_MANUAL_TITLE: ${{ inputs.reddit_manual_title }}
           REDDIT_MANUAL_BODY: ${{ inputs.reddit_manual_body }}
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          BACKGROUND: ${{ inputs.background }}
+          BACKGROUND: random
           YOUTUBE_GAMEPLAY_URL: https://youtu.be/s3_xa3qdsks
-          GAMEPLAY_RIGHTS: ${{ inputs.gameplay_rights }}
-          LAYOUT: ${{ inputs.layout }}
-          VOICE: ${{ inputs.voice }}
-          CAPTIONS: ${{ inputs.captions }}
+          LAYOUT: full
+          VOICE: guy
+          CAPTIONS: karaoke
           DATA_DIR: ${{ github.workspace }}/android-output
           WATERMARK: none
           CAPTION_EMPHASIS: 'true'
