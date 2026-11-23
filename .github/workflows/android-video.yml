@@ -70,7 +70,11 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core
-          python -m pip install -e . yt-dlp
+          python -m pip install -e . "yt-dlp[default]"
+      - name: Configure YouTube JavaScript runtime
+        run: |
+          curl -fsSL https://deno.land/install.sh | sh
+          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
       - name: Validate environment
         run: |
           python -m compileall -q purffle_shorts
