@@ -1,0 +1,85 @@
+name: Android - Generate Reddit Short
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Demo needs no API key; script uses your own JSON"
+        type: choice
+        options: [demo, script]
+        default: demo
+      script_path:
+        description: "For script mode: committed JSON path"
+        type: string
+        default: examples/android-story.json
+      background:
+        description: "Random licensed gameplay from media/backgrounds, or generated demo"
+        type: choice
+        options: [random, generated]
+        default: random
+      layout:
+        description: "Full gameplay with captions or split"
+        type: choice
+        options: [full, split]
+        default: full
+      voice:
+        description: "Edge TTS voice"
+        type: choice
+        options: [guy, jenny, ryan, sonia]
+        default: guy
+      captions:
+        description: "Caption style (karaoke highlights current words)"
+        type: choice
+        options: [karaoke, bold, clean, boxed]
+        default: karaoke
+permissions:
+  contents: read
+concurrency:
+  group: android-video-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install FFmpeg and PurffleShorts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install -e .
+      - name: Validate environment
+        run: |
+          python -m compileall -q purffle_shorts
+          ffmpeg -hide_banner -filters | grep -E ' ass '
+          python -m purffle_shorts --help
+      - name: Render with native PurffleShorts pipeline
+        env:
+          MODE: ${{ inputs.mode }}
+          SCRIPT_PATH: ${{ inputs.script_path }}
+          BACKGROUND: ${{ inputs.background }}
+          LAYOUT: ${{ inputs.layout }}
+          VOICE: ${{ inputs.voice }}
+          CAPTIONS: ${{ inputs.captions }}
+          DATA_DIR: ${{ github.workspace }}/android-output
+          WATERMARK: none
+          CAPTION_EMPHASIS: 'true'
+          TTS_ENGINE: edge
+        run: python tools/android_video.py
+      - name: Verify rendered MP4 and metadata
+        run: python tools/check_android_video.py android-output
+      - name: Upload MP4, captions and cover
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-reddit-short
+          path: |
+            android-output/**/*.mp4
+            android-output/**/*.srt
+            android-output/**/cover.jpg
+            android-output/**/metadata.json
+          if-no-files-found: error
+          retention-days: 7
