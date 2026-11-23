@@ -11,3 +11,6 @@ Open **Actions → Android - Generate Reddit Short → Run workflow** on your An
 **Troubleshooting:** Open the failed Actions job to see the step and error. Python syntax, FFmpeg subtitle filter, rendering, and output checks are included.
 
 This workflow is distinct from upstream CI and leaves the upstream test suite intact.
+
+## Fix log
+- Fixed GitHub Actions output directory mismatch: PurffleShorts writes to `output_videos/`, not `DATA_DIR`. Commit `f134c4556aa61a44c6884ca3a8dcb49d810d818c`. The first demo successfully rendered before the artifact verification step failed. Re-run the workflow to verify the fix.
