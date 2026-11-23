@@ -70,15 +70,15 @@ jobs:
           TTS_ENGINE: edge
         run: python tools/android_video.py
       - name: Verify rendered MP4 and metadata
-        run: python tools/check_android_video.py android-output
+        run: python tools/check_android_video.py output_videos
       - name: Upload MP4, captions and cover
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: android-reddit-short
           path: |
-            android-output/**/*.mp4
-            android-output/**/*.srt
+            output_videos/**/*.mp4
+            output_videos/**/*.srt
             android-output/**/cover.jpg
             android-output/**/metadata.json
           if-no-files-found: error
