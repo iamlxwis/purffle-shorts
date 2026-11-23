@@ -16,6 +16,14 @@ on:
         type: choice
         options: [random, generated]
         default: random
+      youtube_gameplay_url:
+        description: "Optional YouTube gameplay URL (only footage you own or may reuse)"
+        type: string
+        default: ""
+      gameplay_rights:
+        description: "I own or have permission to reuse the supplied YouTube gameplay"
+        type: boolean
+        default: false
       layout:
         description: "Full gameplay with captions or split"
         type: choice
@@ -50,7 +58,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core
-          python -m pip install -e .
+          python -m pip install -e . yt-dlp
       - name: Validate environment
         run: |
           python -m compileall -q purffle_shorts
@@ -61,6 +69,8 @@ jobs:
           MODE: ${{ inputs.mode }}
           SCRIPT_PATH: ${{ inputs.script_path }}
           BACKGROUND: ${{ inputs.background }}
+          YOUTUBE_GAMEPLAY_URL: ${{ inputs.youtube_gameplay_url }}
+          GAMEPLAY_RIGHTS: ${{ inputs.gameplay_rights }}
           LAYOUT: ${{ inputs.layout }}
           VOICE: ${{ inputs.voice }}
           CAPTIONS: ${{ inputs.captions }}
@@ -79,7 +89,7 @@ jobs:
           path: |
             output_videos/**/*.mp4
             output_videos/**/*.srt
-            android-output/**/cover.jpg
-            android-output/**/metadata.json
+            output_videos/**/cover.jpg
+            output_videos/**/metadata.json
           if-no-files-found: error
           retention-days: 7
