@@ -49,9 +49,12 @@ def main():
         raise SystemExit("Set background to random to use a YouTube gameplay URL")
     if background == "random":
         folder = Path("media/backgrounds")
-        if youtube_url:
-            download_authorized_gameplay(youtube_url, folder)
         clips = sorted(p for p in folder.glob("*") if p.suffix.lower() in {".mp4", ".mov", ".mkv", ".webm"} and p.is_file())
+        if clips:
+            print("Using supplied gameplay file; skipping blocked YouTube download", flush=True)
+        elif youtube_url:
+            download_authorized_gameplay(youtube_url, folder)
+            clips = sorted(p for p in folder.glob("*") if p.suffix.lower() in {".mp4", ".mov", ".mkv", ".webm"} and p.is_file())
         if clips:
             # The native engine randomly chooses one of these clips.
             args.extend(["--background", str(folder)])
