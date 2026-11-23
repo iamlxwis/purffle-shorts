@@ -40,10 +40,28 @@ def clean(s):
 
 def choose_post():
     direct = os.environ.get("REDDIT_POST_URL", "").strip()
+    title = os.environ.get("REDDIT_MANUAL_TITLE", "").strip()
+    body = os.environ.get("REDDIT_MANUAL_BODY", "").strip()
+    if title or body:
+        if not title or not body or not direct:
+            raise ValueError("Manual fallback requires Reddit post URL, title and body")
+        if len(title) > 300 or len(body) > 15000:
+            raise ValueError("Manual story is too long")
+        u = urlparse(direct)
+        if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"} or not re.match(r"^/r/[A-Za-z0-9_]+/(?:s/[A-Za-z0-9]+|comments/[A-Za-z0-9]+)", u.path):
+            raise ValueError("Invalid Reddit post URL")
+        return {"title": title, "selftext": body, "subreddit": u.path.split("/")[2], "author": "unknown", "permalink": u.path, "manual_source": True}
     if direct:
         u = urlparse(direct)
-        if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"} or not re.match(r"^/r/[A-Za-z0-9_]+/comments/[A-Za-z0-9]+/", u.path):
-            raise ValueError("Provide an HTTPS reddit.com/r/.../comments/... post URL")
+        if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"}:
+            raise ValueError("Invalid Reddit URL")
+        if re.match(r"^/r/[A-Za-z0-9_]+/s/[A-Za-z0-9]+/?$", u.path):
+            with urlopen(Request(direct, headers={"User-Agent": USER_AGENT}), timeout=25) as response:
+                u = urlparse(response.url)
+            if u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"}:
+                raise ValueError("Share link redirected outside Reddit")
+        if not re.match(r"^/r/[A-Za-z0-9_]+/comments/[A-Za-z0-9]+(?:/|$)", u.path):
+            raise ValueError("Could not resolve Reddit share link")
         url = "https://www.reddit.com" + u.path.rstrip("/") + ".json?raw_json=1"
         data = fetch_json(url)
         return data[0]["data"]["children"][0]["data"]
