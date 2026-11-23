@@ -22,3 +22,8 @@ Change log: 11:30 PM PHT, November 24, 2026 — added YouTube gameplay URL and r
 
 ## Production mode (current)
 The Android workflow now uses `purffle_shorts make --script ...` exclusively. The sample JSON is an original fictional story, not a fetched Reddit post; edit the committed script for your desired content. A gameplay MP4 is required, either from an authorized YouTube URL or from `media/backgrounds/`. The workflow creates an actual finished MP4 artifact, with no demo fallback. Automatic Reddit story fetching is not configured. Status: production-mode changes committed; a successful run with gameplay footage has not yet been verified.
+
+## Automatic real Reddit stories
+Production workflow default is now `mode: reddit`. Choose `reddit_subreddit` for a random eligible public self-post, or supply `reddit_post_url` for one specific public post. The original post's title and first 155 body words are narrated as an attributed excerpt; this may end before the original post does. It does not fabricate an ending or generate a fake Reddit story. Reddit's public JSON endpoints may reject GitHub-hosted requests (including HTTP 403 or 429); the workflow fails explicitly in that case. No Reddit credentials or bypasses are used. Choose `mode: script` to render your own committed script instead. For real gameplay also supply an authorized YouTube gameplay URL and confirm rights.
+
+Status: Reddit source implementation committed, end-to-end production rendering with Reddit access not yet verified.
