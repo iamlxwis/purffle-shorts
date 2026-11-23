@@ -30,3 +30,6 @@ Status: Reddit source implementation committed, end-to-end production rendering 
 
 ## Reddit share links without credentials
 Use `mode: reddit` and paste the Reddit `/r/.../s/...` share URL into `reddit_post_url`. If Reddit blocks API access, paste the actual title into `reddit_manual_title` and the actual post text into `reddit_manual_body` as well. Providing both manual fields bypasses the Reddit network request entirely; do not invent or paraphrase the source text. The fixed gameplay video is `https://youtu.be/s3_xa3qdsks` and requires the gameplay rights checkbox. Automatic Reddit extraction still requires approved Reddit API credentials; a share URL alone does not remove Reddit access restrictions. Status: implementation committed; full video generation not yet confirmed.
+
+## Two-field production workflow (current)
+Open Actions > Android - Generate Reddit Short > Run workflow. Enter only **Video title** and **Post text**. The workflow uses Guy narration, karaoke captions, 720x1280 full gameplay, and the fixed YouTube source `https://youtu.be/s3_xa3qdsks`. You must have permission to reuse the gameplay and story. YouTube may block automated GitHub downloads, so a successful render is not guaranteed until a complete run passes.
