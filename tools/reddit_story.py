@@ -10,10 +10,26 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+from urllib.parse import urlencode
+from urllib.error import HTTPError
+from base64 import b64encode
 
 USER_AGENT = "PurffleShorts/1.0 (public-story attribution; contact repository owner)"
 def fetch_json(url):
-    req = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    client_id = os.environ.get("REDDIT_CLIENT_ID", "").strip()
+    client_secret = os.environ.get("REDDIT_CLIENT_SECRET", "").strip()
+    if not client_id or not client_secret:
+        raise RuntimeError("Reddit blocks unauthenticated GitHub Actions requests (HTTP 403). Set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET repository secrets for approved Reddit API access, or use script mode.")
+    token_req = Request("https://www.reddit.com/api/v1/access_token",
+                        data=urlencode({"grant_type": "client_credentials"}).encode(),
+                        headers={"User-Agent": USER_AGENT,
+                                 "Authorization": "Basic " + b64encode(f"{client_id}:{client_secret}".encode()).decode()})
+    with urlopen(token_req, timeout=25) as response:
+        token = json.load(response)["access_token"]
+    path = urlparse(url)
+    oauth_url = "https://oauth.reddit.com" + path.path + ("?" + path.query if path.query else "")
+    req = Request(oauth_url, headers={"User-Agent": USER_AGENT,
+                                     "Authorization": "bearer " + token, "Accept": "application/json"})
     with urlopen(req, timeout=25) as response:
         return json.load(response)
 
