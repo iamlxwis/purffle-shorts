@@ -43,14 +43,23 @@ def choose_post():
     title = os.environ.get("REDDIT_MANUAL_TITLE", "").strip()
     body = os.environ.get("REDDIT_MANUAL_BODY", "").strip()
     if title or body:
-        if not title or not body or not direct:
-            raise ValueError("Manual fallback requires Reddit post URL, title and body")
+        if not title or not body:
+            raise ValueError("Manual fallback requires both Reddit title and body")
         if len(title) > 300 or len(body) > 15000:
             raise ValueError("Manual story is too long")
-        u = urlparse(direct)
-        if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"} or not re.match(r"^/r/[A-Za-z0-9_]+/(?:s/[A-Za-z0-9]+|comments/[A-Za-z0-9]+)", u.path):
-            raise ValueError("Invalid Reddit post URL")
-        return {"title": title, "selftext": body, "subreddit": u.path.split("/")[2], "author": "unknown", "permalink": u.path, "manual_source": True}
+        if direct:
+            u = urlparse(direct)
+            if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"} or not re.match(r"^/r/[A-Za-z0-9_]+/(?:s/[A-Za-z0-9]+|comments/[A-Za-z0-9]+)", u.path):
+                raise ValueError("Invalid Reddit post URL")
+            subreddit = u.path.split("/")[2]
+            permalink = u.path
+        else:
+            subreddit = os.environ.get("REDDIT_SUBREDDIT", "stories").strip().removeprefix("r/")
+            if not re.fullmatch(r"[A-Za-z0-9_]{2,21}", subreddit):
+                raise ValueError("Invalid subreddit name")
+            permalink = ""
+        return {"title": title, "selftext": body, "subreddit": subreddit,
+                "author": "unknown", "permalink": permalink, "manual_source": True}
     if direct:
         u = urlparse(direct)
         if u.scheme != "https" or u.hostname not in {"reddit.com", "www.reddit.com", "old.reddit.com"}:
@@ -88,7 +97,7 @@ def build(post):
     chunks = [" ".join(words[i:i+30]) for i in range(0, len(words), 30)]
     community = post.get("subreddit", "stories")
     permalink = "https://www.reddit.com" + post.get("permalink", "")
-    if not permalink.startswith("https://www.reddit.com/r/"):
+    if post.get("permalink") and not permalink.startswith("https://www.reddit.com/r/"):
         raise ValueError("Invalid Reddit permalink")
     return {
         "topic": title[:100], "title": title[:100], "hook_text": title[:45],
