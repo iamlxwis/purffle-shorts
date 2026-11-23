@@ -26,12 +26,14 @@ VOICES = {"guy": "en-US-GuyNeural", "jenny": "en-US-JennyNeural",
           "ryan": "en-GB-RyanNeural", "sonia": "en-GB-SoniaNeural"}
 
 def main():
-    mode = os.environ.get("MODE", "demo")
+    mode = os.environ.get("MODE", "script")
+    if mode != "script":
+        raise SystemExit("Production workflow requires script mode; demo rendering is disabled")
     layout = os.environ.get("LAYOUT", "full")
     voice = VOICES[os.environ.get("VOICE", "guy")]
     captions = os.environ.get("CAPTIONS", "karaoke")
     background = os.environ.get("BACKGROUND", "random")
-    args = [sys.executable, "-m", "purffle_shorts", mode if mode == "demo" else "make",
+    args = [sys.executable, "-m", "purffle_shorts", "make",
             "--style", "reddit", "--layout", layout, "--voice", voice,
             "--tts", "edge", "--caption-style", captions, "--resolution", "720x1280",
             "--no-upload", "--no-music"]
@@ -53,7 +55,7 @@ def main():
             args.extend(["--background", str(folder)])
             print(f"Found {len(clips)} licensed user-provided gameplay clip(s)", flush=True)
         else:
-            raise SystemExit("No gameplay MP4 found. Supply an authorized YouTube URL or add media/backgrounds/*.mp4. Select generated to use demo visuals.")
+            raise SystemExit("No gameplay MP4 found. Supply an authorized YouTube URL or add media/backgrounds/*.mp4; production runs require real footage.")
     print("Running native PurffleShorts:", " ".join(args), flush=True)
     subprocess.run(args, check=True)
 
