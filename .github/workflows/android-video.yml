@@ -24,12 +24,8 @@ on:
         type: choice
         options: [random]
         default: random
-      youtube_gameplay_url:
-        description: "Optional YouTube gameplay URL (only footage you own or may reuse)"
-        type: string
-        default: ""
       gameplay_rights:
-        description: "I own or have permission to reuse the supplied YouTube gameplay"
+        description: "I confirm permission to reuse the fixed YouTube gameplay video"
         type: boolean
         default: false
       layout:
@@ -79,7 +75,7 @@ jobs:
           REDDIT_SUBREDDIT: ${{ inputs.reddit_subreddit }}
           REDDIT_POST_URL: ${{ inputs.reddit_post_url }}
           BACKGROUND: ${{ inputs.background }}
-          YOUTUBE_GAMEPLAY_URL: ${{ inputs.youtube_gameplay_url }}
+          YOUTUBE_GAMEPLAY_URL: https://youtu.be/s3_xa3qdsks
           GAMEPLAY_RIGHTS: ${{ inputs.gameplay_rights }}
           LAYOUT: ${{ inputs.layout }}
           VOICE: ${{ inputs.voice }}
