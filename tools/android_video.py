@@ -26,9 +26,9 @@ VOICES = {"guy": "en-US-GuyNeural", "jenny": "en-US-JennyNeural",
           "ryan": "en-GB-RyanNeural", "sonia": "en-GB-SoniaNeural"}
 
 def main():
-    mode = os.environ.get("MODE", "script")
-    if mode != "script":
-        raise SystemExit("Production workflow requires script mode; demo rendering is disabled")
+    mode = os.environ.get("MODE", "reddit")
+    if mode not in {"reddit", "script"}:
+        raise SystemExit("Production workflow requires reddit or script mode")
     layout = os.environ.get("LAYOUT", "full")
     voice = VOICES[os.environ.get("VOICE", "guy")]
     captions = os.environ.get("CAPTIONS", "karaoke")
@@ -37,8 +37,10 @@ def main():
             "--style", "reddit", "--layout", layout, "--voice", voice,
             "--tts", "edge", "--caption-style", captions, "--resolution", "720x1280",
             "--no-upload", "--no-music"]
-    if mode == "script":
-        script = Path(os.environ.get("SCRIPT_PATH", "examples/android-story.json"))
+    if mode in {"reddit", "script"}:
+        script = Path("android-output/reddit-script.json") if mode == "reddit" else Path(os.environ.get("SCRIPT_PATH", "examples/android-story.json"))
+        if mode == "reddit":
+            subprocess.run([sys.executable, "tools/reddit_story.py", str(script)], check=True)
         if not script.is_file() or script.suffix.lower() != ".json":
             raise SystemExit(f"Script JSON does not exist: {script}")
         args.extend(["--script", str(script)])
